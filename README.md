@@ -1,4 +1,4 @@
-# MAFMC_SpeciesShifts
+# Species shifts in the Mid-Altantic Fisheries Management Area
 GMRI's work for the Mid-Atlantic Fisheries Management Council to evaluate species distribution shift indicators and develop a framework to support fisheries governance of shifting stocks.
 
 # Objectives
@@ -10,3 +10,9 @@ Objective 2: Synthesize species and fishery distribution changes for Mid-Atlanti
 Objective 3: Identify and evaluate potential species and fishery distribution indicators relevant to fisheries governance, and test these indicators with a set of selected species.  
 Objective 4: Develop a framework for continued monitoring and integration of species and fishery distribution indicators into decision-making processes.
 
+# Surveys and visualizations
+[Visualization examples](https://carlylovas.github.io/MAFMC_SpeciesShifts/code/example_viz.html)
+
+[SEAMAP-SA](https://carlylovas.github.io/MAFMC_SpeciesShifts/code/se_summaries.html)
+
+[NMFS Trawl](https://carlylovas.github.io/MAFMC_SpeciesShifts/code/nmfs_trawl.html) 
