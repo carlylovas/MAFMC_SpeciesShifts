@@ -1,12 +1,14 @@
 ---
 title: "A spattering of things"
+lightbox: auto
 subtitle: "An offering of data visualizations"
 format: 
   html:
     toc: true
     self-contained: true
+    grid: 
+      body-width: 900px
     theme: darkly
-lightbox: auto
 editor: visual
 ---
 
@@ -128,7 +130,6 @@ theme_trendy_gmri <- function(base_size = 10,
 }
 ```
 
-
 ```{r}
 #| label: weighted functions
 #| echo: false
@@ -224,14 +225,12 @@ env_plots <- matl_dat |>
   nest() |>
   mutate(plot = map(data, function(df){
     plot <- ggplot(data = df) +
-      geom_line(aes(x=year, y=measurement), color = "#E9E9E9", linewidth = 0.8)+
-      geom_point(aes(x = year, y = measurement), size=0.5) +
+      geom_line(aes(x=year, y=measurement), color = "#e9e9e9", linewidth = 0.8)+
+      geom_point(aes(x = year, y = measurement), color = "#ffffff",size=0.5) +
       ggtitle(label, subtitle = "Weighted by biomass") +
-      theme_gmri(axis.title   = element_blank(),
-                 plot.subtitle = element_text(size = 11))
+      theme_trendy_gmri(axis.title   = element_blank(),
+                        plot.subtitle = element_text(size = 11))
     return(plot)}))
-
-# env_plots$plot[[1]]
 
 # Depth ----
 depth_plots <- matl_dat |> 
@@ -241,11 +240,11 @@ depth_plots <- matl_dat |>
   nest() |>
   mutate(plot = map(data, function(df){
     plot <- ggplot(data = df) +
-      geom_line(aes(x=year, y=avg_depth), color = "#E9E9E9", linewidth = 0.8)+
-      geom_point(aes(x = year, y = avg_depth), size=0.5) +
+      geom_line(aes(x=year, y=avg_depth), color = "#e9e9e9", linewidth = 0.8)+
+      geom_point(aes(x = year, y = avg_depth), size=0.5, color = "#ffffff") +
       scale_y_reverse() +
       ggtitle("Depth", subtitle = "Weighted by biomass") +
-      theme_gmri(axis.title   = element_blank(),
+      theme_trendy_gmri(axis.title   = element_blank(),
                  plot.subtitle = element_text(size = 11))
     return(plot)
   })) |>
@@ -275,15 +274,17 @@ all_percentiles <- lat_percentiles |>
   nest() |>
   mutate(lat = map2(data, comname, {function(x,y)
     out <- ggplot(data = x) +
-      geom_line(aes(x = year, y = roll_lat, color = factor), linetype = 2, linewidth = 0.8) +
-      geom_line(aes(x = year, y = lat, color = factor), alpha = 0.15) +
+      geom_line(aes(x = year, y = roll_lat, color = factor), linetype = 2, linewidth = 1) +
+      geom_line(aes(x = year, y = lat, color = factor), alpha = 0.25, linewidth = 1) +
       guides(color = guide_legend(levels = c(`5%`, `25%`, `50%`, `75%`, `95%`), title = "Percentiles")) +
       ggtitle("Biomass-weighted latitude percentiles", subtitle = "5-year rolling mean represented by dashed line") +
       ylab("Latitude") + xlab("Year") +
       scale_color_gmri() +
-      theme_gmri(plot.subtitle = element_text(size = 11)) 
+      theme_trendy_gmri(plot.subtitle = element_text(size = 11)) 
     })) |>
   select(!data)
+
+# all_percentiles$lat[[1]]
 
 # Longitude (and combine) ----
 lon_percentiles |> 
@@ -296,13 +297,13 @@ lon_percentiles |>
   nest() |>
   mutate(lon = map2(data, comname, {function(x,y)
     out <- ggplot(data = x) +
-      geom_line(aes(x = year, y = roll_lon, color = factor), linetype = 2, linewidth = 0.8) +
-      geom_line(aes(x = year, y = lon, color = factor), alpha = 0.15) +
+      geom_line(aes(x = year, y = roll_lon, color = factor), linetype = 2, linewidth = 1) +
+      geom_line(aes(x = year, y = lon, color = factor), alpha = 0.25, linewidth = 1) +
       guides(color = guide_legend(levels = c(`5%`, `25%`, `50%`, `75%`, `95%`), title = "Percentiles")) +
       ggtitle("Biomass-weighted longitude percentiles", subtitle = "5-year rolling mean represented by dashed line") +
       ylab("Longitude") + xlab("Year") +
       scale_color_gmri() +
-      theme_gmri(plot.subtitle = element_text(size = 11)) 
+      theme_trendy_gmri(plot.subtitle = element_text(size = 11)) 
     })) |>
   select(!data) |>
   left_join(all_percentiles) -> all_percentiles
@@ -329,40 +330,42 @@ seasonal_dat |>
     usa <- ne_states("united states of america")
     can <- ne_states("canada")
     ggplot() +
-      geom_sf(data = usa) + geom_sf(data = can) + geom_sf(data = east_coast, fill = "transparent", linetype = 3) +
-      coord_sf(xlim = c(-66,-74), ylim = c(35,45)) +
-      geom_point(data = x, aes(x = avg_lon, y = avg_lat, color = season)) +
-      scale_x_continuous(breaks = c(-74,-70,-66)) + scale_y_continuous(breaks = c(35, 38, 41, 44)) +
-      ggtitle(str_to_sentence(comname)) +
+      geom_sf(data = usa, fill = "#222222", color = "#9a9a9a") + geom_sf(data = can, fill = "#222222", color = "#9a9a9a") + geom_sf(data = east_coast, fill = "transparent", color = "#9a9a9a", linetype = 3) +
+      coord_sf(xlim = c(-66,-78), ylim = c(35,45)) +
+      geom_point(data = x, aes(x = avg_lon, y = avg_lat, color = season), size = 3, alpha = 0.8) +
+      scale_x_continuous(breaks = c(-76,-72,-68)) + scale_y_continuous(breaks = c(35, 38, 41, 44)) +
+      # ggtitle(str_to_sentence(comname)) +
       guides(color = guide_legend(title = "Season")) + 
-      scale_color_gmri() + 
-      facet_wrap(~decade, nrow = 1) +
-      theme_gmri(panel.grid.major = element_blank(),
-                 panel.border = element_rect(linetype = 1, color = "black"),
-                 strip.background = element_blank(),
-                 strip.text = element_text(color = "black"),
-                 axis.line = element_blank(),
-                 axis.title = element_blank(),
-                 plot.margin = margin(0.1,1,0.1,1, unit = "mm"), #t,r,b,l
-                 text = element_text(family = "sans"))
+      scale_color_manual(values = c("#00608a","#ea4f12")) +
+      facet_wrap(~decade, nrow = 1) + 
+      theme_trendy_gmri(axis.text = element_text(size = 12),
+                        legend.text = element_text(size = 12),
+                        legend.title = element_text(size = 12),
+                        strip.text = element_text(size = 12),
+                        axis.title = element_blank(),
+                        plot.background = element_rect(color = "transparent"),
+                        plot.margin = margin(0,0,0,0, unit = "mm"),
+                        legend.position = "top",
+                        legend.key = element_rect(color = "transparent"))
   })) -> static_maps
 
+# static_maps$map[[1]]
+
 # trying different layouts (cuz I'm bored)
-spp <- weighted_dat |>
-  filter(comname == "atlantic mackerel")
+# spp <- weighted_dat |>
+#   filter(comname == "atlantic mackerel")
+# 
+# ggplot() +
+#   geom_sf(data = usa, fill = "#222222", color = "#6a6a6a") + geom_sf(data = can, fill = "#222222", color = "#6a6a6a") + geom_sf(data = east_coast, fill = "transparent", color = "#9a9a9a", linetype = 3) +
+#   coord_sf(xlim = c(-66,-78), ylim = c(35,45), expand = FALSE) +
+#   geom_point(data = spp, aes(x = avg_lon, y = avg_lat, color = year), size = 3, alpha = 10) +
+#   guides(color = guide_legend(title = "Year")) +
+#   scale_color_gradient2(low = "#004966", mid = "#ffffff", high = "#b94a40", midpoint = 1995) +
+#   scale_x_continuous(breaks = c(-76,-72,-68)) + scale_y_continuous(breaks = c(38, 40, 42, 44)) +
+#   ggtitle("Atlantic mackerel") +
+#   theme_trendy_gmri(axis.title = element_blank())
+#   # theme_gmri(
 
-ggplot() +
-  geom_sf(data = usa, fill = "#222222", color = "#6a6a6a") + geom_sf(data = can, fill = "#222222", color = "#6a6a6a") + geom_sf(data = east_coast, fill = "transparent", color = "#9a9a9a", linetype = 3) +
-  coord_sf(xlim = c(-66,-78), ylim = c(35,45), expand = FALSE) +
-  geom_point(data = spp, aes(x = avg_lon, y = avg_lat, color = year), size = 3) +
-  scale_color_gradient2(low = "#004966", mid = "#ffffff", high = "#b94a40", midpoint = 1995) +
-  scale_x_continuous(breaks = c(-76,-72,-68)) + scale_y_continuous(breaks = c(38, 40, 42, 44)) +
-  ggtitle("Atlantic mackerel") +
-  theme_trendy_gmri(axis.title = element_blank())
-
-
-
-  # theme_gmri(
   #   rect = element_rect(fill = "#222222"),
   #   text = element_text(color = "#e9e9e9"),
   #   axis.line.x = element_blank(),
@@ -383,78 +386,38 @@ ggplot() +
 
 ## Animated ----
 # example #1
-atl_mack <- seasonal_dat |>
+atl_mack <- weighted_dat |>
   filter(comname == "atlantic mackerel")
 
-ggplot() + 
-  geom_sf(data = usa) + geom_sf(data = can) +
-  coord_sf(xlim = c(-66,-74), ylim = c(38,45)) +
-  geom_point(data = atl_mack, aes(x = avg_lon, y = avg_lat, color = season)) +
-  scale_x_continuous(breaks = c(-74,-70,-66)) + scale_y_continuous(breaks = c(38, 40, 42,44)) +
-  guides(color = guide_legend(title = "Season")) + 
-  scale_color_gmri() + 
-  theme_gmri(panel.grid.major = element_blank(),
-             panel.border = element_rect(linetype = 1, color = "black"),
-             axis.line = element_blank(),
-             axis.title = element_blank(),
-             plot.margin = margin(0.1,1,0.1,1, unit = "mm"), #t,r,b,l
-             text = element_text(family = "sans"))  -> map_stat
+ggplot() +
+  geom_sf(data = usa, fill = "#222222", color = "#6a6a6a") + geom_sf(data = can, fill = "#222222", color = "#6a6a6a") + geom_sf(data = east_coast, fill = "transparent", color = "#9a9a9a", linetype = 3) +
+  coord_sf(xlim = c(-66,-78), ylim = c(35,45), expand = FALSE) +
+  geom_point(data = atl_mack, aes(x = avg_lon, y = avg_lat, color = year), size = 1) +
+  scale_color_gradient2(low = "#004966", mid = "#ffffff", high = "#b94a40", midpoint = 1995) +
+  scale_x_continuous(breaks = c(-76,-72,-68)) + scale_y_continuous(breaks = c(36, 40, 44)) +
+  theme_trendy_gmri(axis.title = element_blank(),
+                    plot.title = element_text(size = 7),
+                    plot.subtitle = element_text(size = 5),
+                    axis.text = element_text(size = 5),
+                    legend.position = "none") -> map_stat
 
 # map_stat +
 #   gganimate::transition_states(
 #     year, # Uses each year (est_year in the data) as a state
 #     transition_length = 1,
 #     state_length = 10) +
-#     gganimate::shadow_mark(alpha = 0.1, size = 8) +
+#     gganimate::shadow_mark(alpha = 0.5, size = 3) +
 #     gganimate::ease_aes('linear') +
 #   labs(
 #     # y = "Latitude",
 #     # x = "Longitude",
-#     title = "Atlantic mackerel center of biomass",
+#     title = "Center of biomass",
 #     subtitle = 'Year: {closest_state}') -> map_ani
-# 
-# gganimate::animate(map_ani, fps = 10, width = 4, height = 4, units = "in", res = 250) -> map_final
+# # 
+# gganimate::animate(map_ani, fps = 10, width = 1, height = 1, units = "in", res = 550) -> map_final # width = 3, height = 3, units = "in",
 # gganimate::anim_save(here("atl_mack.gif"), map_final)
 
 # knitr::include_graphics(here::here("atl_mack.gif"))
-
-# example #2 
-atl_croak <- seasonal_dat |>
-  filter(comname == "atlantic croaker")
-
-ggplot() + 
-  geom_sf(data = usa) + geom_sf(data = can) +
-  coord_sf(xlim = c(-70,-80), ylim = c(34,42)) +
-  # geom_line(data = alewife, aes(x = avg_lon, y = avg_lat, group = year)) +
-  geom_point(data = atl_croak, aes(x = avg_lon, y = avg_lat, color = season)) +
-  scale_x_continuous(breaks = c(-80,-75,-70)) + scale_y_continuous(breaks = c(34, 38, 42)) +
-  guides(color = guide_legend(title = "Season")) + 
-  scale_color_gmri() + 
-  theme_gmri(panel.grid.major = element_blank(),
-             panel.border = element_rect(linetype = 1, color = "black"),
-             axis.line = element_blank(),
-             axis.title = element_blank(),
-             plot.margin = margin(0.1,1,0.1,1, unit = "mm"), #t,r,b,l
-             text = element_text(family = "sans"))  -> map_stat
-
-# map_stat +
-#   gganimate::transition_states(
-#     year, # Uses each year (est_year in the data) as a state
-#     transition_length = 1,
-#     state_length = 10) +
-#     gganimate::shadow_mark(alpha = 0.1, size = 8) +
-#     gganimate::ease_aes('linear') +
-#   labs(
-#     # y = "Latitude",
-#     # x = "Longitude",
-#     title = "Atlantic croaker center of biomass",
-#     subtitle = 'Year: {closest_state}') -> map_ani
-# 
-# gganimate::animate(map_ani, fps = 10, width = 3, height = 3, units = "in", res = 250) -> map_final
-# gganimate::anim_save(here("atl_croak.gif"), map_final)
-
-# knitr::include_graphics(here::here("atl_croak.gif"))
-
 
 ```
 
@@ -497,7 +460,8 @@ avg_biomass |>
       ggtitle("Latitudinal bins") +
       xlab("Biomass") + ylab("Latitude") +
       facet_grid(~decade) +
-      theme_trendy_gmri() 
+      theme_trendy_gmri(legend.position = "bottom",
+                        axis.text.x = element_text(angle = 90, size = 10))
       # theme_gmri(axis.text.x = element_text(angle = 90, size = 8),
       #            strip.background = element_blank(),
       #            legend.position = "bottom",
@@ -535,16 +499,24 @@ ridge_plots <- weighted_dat |>
 ```
 
 ### Atlantic mackerel
-```{r}
-#| label: example animated map
-#| echo: false
-#| message: false
-#| warning: false
-#| fig-width: 3
+Managed by the Mid-Atlantic fisheries management council
+
+#### Distributions
+
+```{r, dev = "png", dev.args=list(bg="transparent")}
+#| label: maps 
+#| echo: false 
+#| message: false 
+#| warning: false 
+#| fig-align: center 
+#| fig-width: 11 
 #| fig-height: 3
 
-# knitr::include_graphics(here::here("atl_mack.gif"))
+# Static ----
+static_maps |> filter(comname == "atlantic mackerel") -> x
+x$map[[1]] 
 
+# ggsave(here("atl_mack_map.png"), x$map[[1]], width = 11, height = 3, units = "in")
 ```
 
 ```{r}
@@ -552,24 +524,27 @@ ridge_plots <- weighted_dat |>
 #| echo: false
 #| message: false
 #| warning: false
+#| fig-width: 7
+#| fig-height: 5
+#| fig-align: center
+#| layout-ncol: 2
 
-# species_profiles |>
-#   filter(comname == "atlantic mackerel") -> x
-# 
-# static_maps |>
-#   filter(comname == "atlantic mackerel") ->  mack_map
-# 
-# map <- static_maps$map[static_maps$comname == "atlantic mackerel"][[1]]
-# 
-# cen_lat  <- x$`Center of latitude`[[1]]
-# cen_lon  <- x$`Center of longitude`[[1]]
-# lat_per  <- x$`lat`[[1]]
-# lon_per  <- x$`lon`[[1]]
-# 
-# 
-# grid.arrange(map, cen_lat, cen_lon, lat_per, lon_per, nrow = 4, layout_matrix=rbind(c(1,1), c(2,3), c(4,4), c(5,5)))
+# center of lat, center of lon and percentiles 
+env_plots |>
+  filter(comname == "atlantic mackerel" & label %in% c("Center of latitude", "Center of longitude")) -> x
 
+x$plot[[1]]
+x$plot[[2]]
+
+# percentiles
+all_percentiles |>
+  filter(comname == "atlantic mackerel") -> y
+
+y$lat[[1]]
+y$lon[[1]]
 ```
+
+#### Biomass
 
 ```{r}
 #| label: example biomass plots
@@ -577,17 +552,37 @@ ridge_plots <- weighted_dat |>
 #| message: false
 #| warning: false
 #| layout-ncol: 2
+#| fig-align: center
 #| fig-width: 5
 #| fig-height: 7
 #| lightbox:
 #|   group: r-graph
 
-
 biomass_plots$biomass_bins[[1]]
 
 ridge_plots$ridge_plot[[1]]
+
 ```
 
+#### Environmental variables
 
+```{r}
+#| label: example env plots
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 7
+#| fig-height: 5
+#| fig-align: center
+#| layout-ncol: 3
 
+env_plots |>
+  filter(comname == "atlantic mackerel" & label %in% c("Sea surface temperature","Bottom temperature", "Depth")) -> x
 
+x$plot[[1]]
+x$plot[[2]]
+x$plot[[3]]
+
+```
+
+### Atlantic croaker
