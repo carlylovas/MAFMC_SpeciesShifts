@@ -191,13 +191,13 @@ lon_percentiles <- lon_percentiles_fn(dat, year)
 #| warning: false
 #| message: false
 
-matl_dat <- weighted_dat |>
-  filter(comname %in% mid_atl_spp) |>
-  mutate(decade = 10*year%/%10) 
-
-matl_perc <- lat_percentiles |>
-  filter(comname %in% mid_atl_spp) |> 
-  mutate(decade = 10*year%/%10)
+# matl_dat <- weighted_dat |>
+#   filter(comname %in% mid_atl_spp) |>
+#   mutate(decade = 10*year%/%10) 
+# 
+# matl_perc <- lat_percentiles |>
+#   filter(comname %in% mid_atl_spp) |> 
+#   mutate(decade = 10*year%/%10)
 
 ```
 
@@ -208,8 +208,8 @@ matl_perc <- lat_percentiles |>
 #| warning: false
 
 # Lat, Lon, SST & BT ----
-env_plots <- matl_dat |> 
-  # mutate(decade = 10*year%/%10) |>
+env_plots <- weighted_dat |> 
+  mutate(decade = 10*year%/%10) |>
   pivot_longer(cols = avg_lat:avg_depth, names_to = "variable", values_to = "measurement") |>
   filter(!variable == "avg_depth") |> # add back in later
   mutate(label = case_when(
@@ -233,8 +233,8 @@ env_plots <- matl_dat |>
     return(plot)}))
 
 # Depth ----
-depth_plots <- matl_dat |> 
-  # mutate(decade = 10*year%/%10) |> 
+depth_plots <- weighted_dat |> 
+  mutate(decade = 10*year%/%10) |> 
   select(comname, year, decade, avg_depth) |>
   group_by(comname) |>
   nest() |>
@@ -265,7 +265,7 @@ env_plots |>
 
 # Latitude ----
 all_percentiles <- lat_percentiles |> 
-  filter(comname %in% mid_atl_spp) |>
+  # filter(comname %in% mid_atl_spp) |>
   pivot_longer(cols = `5%`:`95%`, names_to = "percentile", values_to = "lat") |>
   mutate(factor = factor(percentile, levels = rev(c("5%","10%","25%","50%","75%","90%","95%")))) |>
   group_by(comname, percentile) |>
@@ -288,7 +288,7 @@ all_percentiles <- lat_percentiles |>
 
 # Longitude (and combine) ----
 lon_percentiles |> 
-  filter(comname %in% mid_atl_spp) |>
+  # filter(comname %in% mid_atl_spp) |>
   pivot_longer(cols = `5%`:`95%`, names_to = "percentile", values_to = "lon") |>
   mutate(factor = factor(percentile, levels = rev(c("5%","10%","25%","50%","75%","90%","95%")))) |>
   group_by(comname, percentile) |>
@@ -322,7 +322,7 @@ can <- ne_states("canada")
 
 ## Static ----
 seasonal_dat |>
-  filter(comname %in% mid_atl_spp) |>
+  # filter(comname %in% mid_atl_spp) |>
   mutate(decade = 10*year%/%10) |>
   group_by(comname) |>
   nest() |>
@@ -386,21 +386,21 @@ seasonal_dat |>
 
 ## Animated ----
 # example #1
-atl_mack <- weighted_dat |>
-  filter(comname == "atlantic mackerel")
-
-ggplot() +
-  geom_sf(data = usa, fill = "#222222", color = "#6a6a6a") + geom_sf(data = can, fill = "#222222", color = "#6a6a6a") + geom_sf(data = east_coast, fill = "transparent", color = "#9a9a9a", linetype = 3) +
-  coord_sf(xlim = c(-66,-78), ylim = c(35,45), expand = FALSE) +
-  geom_point(data = atl_mack, aes(x = avg_lon, y = avg_lat, color = year), size = 1) +
-  scale_color_gradient2(low = "#004966", mid = "#ffffff", high = "#b94a40", midpoint = 1995) +
-  scale_x_continuous(breaks = c(-76,-72,-68)) + scale_y_continuous(breaks = c(36, 40, 44)) +
-  theme_trendy_gmri(axis.title = element_blank(),
-                    plot.title = element_text(size = 7),
-                    plot.subtitle = element_text(size = 5),
-                    axis.text = element_text(size = 5),
-                    legend.position = "none") -> map_stat
-
+# atl_mack <- weighted_dat |>
+#   filter(comname == "atlantic mackerel")
+# 
+# ggplot() +
+#   geom_sf(data = usa, fill = "#222222", color = "#6a6a6a") + geom_sf(data = can, fill = "#222222", color = "#6a6a6a") + geom_sf(data = east_coast, fill = "transparent", color = "#9a9a9a", linetype = 3) +
+#   coord_sf(xlim = c(-66,-78), ylim = c(35,45), expand = FALSE) +
+#   geom_point(data = atl_mack, aes(x = avg_lon, y = avg_lat, color = year), size = 1) +
+#   scale_color_gradient2(low = "#004966", mid = "#ffffff", high = "#b94a40", midpoint = 1995) +
+#   scale_x_continuous(breaks = c(-76,-72,-68)) + scale_y_continuous(breaks = c(36, 40, 44)) +
+#   theme_trendy_gmri(axis.title = element_blank(),
+#                     plot.title = element_text(size = 7),
+#                     plot.subtitle = element_text(size = 5),
+#                     axis.text = element_text(size = 5),
+#                     legend.position = "none") -> map_stat
+# 
 # map_stat +
 #   gganimate::transition_states(
 #     year, # Uses each year (est_year in the data) as a state
@@ -413,11 +413,9 @@ ggplot() +
 #     # x = "Longitude",
 #     title = "Center of biomass",
 #     subtitle = 'Year: {closest_state}') -> map_ani
-# # 
-# gganimate::animate(map_ani, fps = 10, width = 1, height = 1, units = "in", res = 550) -> map_final # width = 3, height = 3, units = "in",
-# gganimate::anim_save(here("atl_mack.gif"), map_final)
-
-# knitr::include_graphics(here::here("atl_mack.gif"))
+# 
+# gganimate::animate(map_ani, fps = 10, width = 3, height = 3, units = "in", res = 550) -> map_final # width = 3, height = 3, units = "in",
+# gganimate::anim_save(here("atl_mack.gif"), map_final, bg = "transparent")
 
 ```
 
@@ -430,11 +428,11 @@ ggplot() +
 
 # Lat bins ----
 decade_perc <- lat_percentiles_fn(dat, decade)
-lat_bins <- decade_perc |>
-  filter(comname %in% mid_atl_spp)
+lat_bins <- decade_perc # |>
+  # filter(comname %in% mid_atl_spp)
 
 dat |>
-  filter(comname %in% mid_atl_spp) |>
+  # filter(comname %in% mid_atl_spp) |>
   select(comname, year, decade, lat, total_biomass_kg) |>
   mutate(lat = round(lat, digits = 1)) |>
   group_by(comname, decade, lat) |>
@@ -462,12 +460,6 @@ avg_biomass |>
       facet_grid(~decade) +
       theme_trendy_gmri(legend.position = "bottom",
                         axis.text.x = element_text(angle = 90, size = 10))
-      # theme_gmri(axis.text.x = element_text(angle = 90, size = 8),
-      #            strip.background = element_blank(),
-      #            legend.position = "bottom",
-      #            axis.line.x = element_line(color = "#535353", linewidth = 0.15),
-      #            strip.text = element_text(color = "black"),
-      #            panel.grid = element_line(linetype = 3, color = "#535353", linewidth = 0.1))
   })) |>
   select(!data) -> biomass_plots
 
@@ -475,7 +467,7 @@ avg_biomass |>
 # Density ridges ----
 # copied over from nmfs code
 ridge_plots <- weighted_dat |>
-  filter(comname %in% mid_atl_spp) |> 
+  # filter(comname %in% mid_atl_spp) |> 
   mutate(decade = 10*year %/% 10) |>
   group_by(comname) |>
   nest() |>
@@ -490,16 +482,16 @@ ridge_plots <- weighted_dat |>
       theme_trendy_gmri(legend.position = "bottom",
                  plot.subtitle = element_text(size = 12),
                  axis.title.x = element_blank())
-      # theme_gmri(legend.position = "bottom",
-      #            plot.subtitle = element_text(size = 12),
-      #            axis.title.x = element_blank()) 
     return(plot)
   })) |>
   select(!data)
 ```
 
 ### Atlantic mackerel
+
 Managed by the Mid-Atlantic fisheries management council
+
+
 
 #### Distributions
 
@@ -517,6 +509,8 @@ static_maps |> filter(comname == "atlantic mackerel") -> x
 x$map[[1]] 
 
 # ggsave(here("atl_mack_map.png"), x$map[[1]], width = 11, height = 3, units = "in")
+
+# ![](images/atl_mack-01.gif){fig-align="center", width="4.5in", dev = "gif" dev.args=list(bg="transparent")}
 ```
 
 ```{r}
@@ -558,9 +552,11 @@ y$lon[[1]]
 #| lightbox:
 #|   group: r-graph
 
-biomass_plots$biomass_bins[[1]]
+biomass_plots |> filter(comname == "atlantic mackerel") -> x
+ridge_plots   |> filter(comname == "atlantic mackerel") -> y
 
-ridge_plots$ridge_plot[[1]]
+x$biomass_bins[[1]]
+y$ridge_plot[[1]]
 
 ```
 
@@ -586,3 +582,87 @@ x$plot[[3]]
 ```
 
 ### Atlantic croaker
+
+#### Distributions
+
+```{r, dev = "png", dev.args=list(bg="transparent")}
+#| label: maps 2
+#| echo: false 
+#| message: false 
+#| warning: false 
+#| fig-align: center 
+#| fig-width: 11 
+#| fig-height: 3
+
+# Static ----
+static_maps |> filter(comname == "atlantic croaker") -> x
+x$map[[1]] 
+```
+
+```{r}
+#| label: example dist plots 2
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 7
+#| fig-height: 5
+#| fig-align: center
+#| layout-ncol: 2
+
+# center of lat, center of lon and percentiles 
+env_plots |>
+  filter(comname == "atlantic croaker" & label %in% c("Center of latitude", "Center of longitude")) -> x
+
+x$plot[[1]]
+x$plot[[2]]
+
+# percentiles
+all_percentiles |>
+  filter(comname == "atlantic croaker") -> y
+
+y$lat[[1]]
+y$lon[[1]]
+```
+
+#### Biomass
+
+```{r}
+#| label: example biomass plots 2
+#| echo: false
+#| message: false
+#| warning: false
+#| layout-ncol: 2
+#| fig-align: center
+#| fig-width: 5
+#| fig-height: 7
+#| lightbox:
+#|   group: r-graph
+
+biomass_plots |> filter(comname == "atlantic croaker") -> x
+ridge_plots   |> filter(comname == "atlantic croaker") -> y
+
+x$biomass_bins[[1]]
+y$ridge_plot[[1]]
+
+```
+
+#### Environmental variables
+
+```{r}
+#| label: example env plots 2
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 7
+#| fig-height: 5
+#| fig-align: center
+#| layout-ncol: 3
+
+env_plots |>
+  filter(comname == "atlantic croaker" & label %in% c("Sea surface temperature","Bottom temperature", "Depth")) -> x
+
+x$plot[[1]]
+x$plot[[2]]
+x$plot[[3]]
+
+```
