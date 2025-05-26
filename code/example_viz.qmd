@@ -34,7 +34,8 @@ library(sf)
 
 # Data ----
 dat <- read_rds(here("data", "trawldat_clean.rds")) |>
-  mutate(decade = 10*year%/%10)
+  mutate(decade = 10*year%/%10) |> 
+  filter(!year %in% c(2017,2020))
 
 mid_atl_spp <- c("summer flounder", "black sea bass", "scup", "atlantic mackerel", "chub mackerel", "butterfish", "longfin squid", "northern shortfin squid", "atlantic surfclam", "ocean quahog", "atlantic bluefish", "tilefish", "blueline tilefish", "spiny dogfish", "goosefish")
 
@@ -353,28 +354,30 @@ seasonal_dat |>
 
 # trying different layouts (cuz I'm bored)
 # spp <- weighted_dat |>
-#   filter(comname == "atlantic mackerel")
+#   filter(comname == "atlantic croaker")
 # 
 # ggplot() +
-#   geom_sf(data = usa, fill = "#222222", color = "#6a6a6a") + geom_sf(data = can, fill = "#222222", color = "#6a6a6a") + geom_sf(data = east_coast, fill = "transparent", color = "#9a9a9a", linetype = 3) +
-#   coord_sf(xlim = c(-66,-78), ylim = c(35,45), expand = FALSE) +
-#   geom_point(data = spp, aes(x = avg_lon, y = avg_lat, color = year), size = 3, alpha = 10) +
+#   geom_sf(data = usa, fill = "#9a9a9a", color = "#000000") + geom_sf(data = can, fill = "#9a9a9a", color = "#000000") + geom_sf(data = east_coast, fill = "transparent", color = "#000000", linetype = 3, linewidth = 0.7) +
+#   coord_sf(xlim = c(-66,-78), ylim = c(32,42), expand = FALSE) +
+#   geom_point(data = spp, aes(x = avg_lon, y = avg_lat, color = year), size = 4, alpha = 10) +
 #   guides(color = guide_legend(title = "Year")) +
 #   scale_color_gradient2(low = "#004966", mid = "#ffffff", high = "#b94a40", midpoint = 1995) +
-#   scale_x_continuous(breaks = c(-76,-72,-68)) + scale_y_continuous(breaks = c(38, 40, 42, 44)) +
-#   ggtitle("Atlantic mackerel") +
-#   theme_trendy_gmri(axis.title = element_blank())
-#   # theme_gmri(
+#   scale_x_continuous(breaks = c(-76,-72,-68)) + scale_y_continuous(breaks = c(32, 37, 42)) +
+#   ggtitle("Atlantic croaker") +
+#   # theme_trendy_gmri(axis.title = element_blank())
+#   theme_gmri(
+#     # rect = element_rect(fill = "#222222"),
+#     # text = element_text(color = "#e9e9e9"),
+#     axis.line.x = element_blank(),
+#     axis.title = element_blank(),
+#     panel.grid.major = element_blank(),
+#     panel.border = element_rect(color = "#000000", linetype = 1, fill = "transparent"),
+#     # panel.background = element_rect(fill = "#222222"),
+#     # plot.background = element_rect(fill = "#222222"),
+#     plot.margin = margin(0,0,0,0, unit = "mm")) -> p #t,r,b,l
+# 
+# ggsave(here("boundary_map_south.png"), height = 7, width = 5, units = "in", bg = "transparent")
 
-  #   rect = element_rect(fill = "#222222"),
-  #   text = element_text(color = "#e9e9e9"),
-  #   axis.line.x = element_blank(),
-  #   axis.title = element_blank(),
-  #   panel.grid.major = element_blank(),
-  #   panel.border = element_rect(color = "#e9e9e9", linetype = 1, fill = "transparent"),
-  #   panel.background = element_rect(fill = "#222222"),
-  #   plot.background = element_rect(fill = "#222222"),
-  #   plot.margin = margin(0,0,0,0, unit = "mm")) #t,r,b,l  
 
 ```
 
@@ -384,7 +387,7 @@ seasonal_dat |>
 #| message: false
 #| warning: false
 
-## Animated ----
+# Animated ----
 # example #1
 # atl_mack <- weighted_dat |>
 #   filter(comname == "atlantic mackerel")
@@ -488,10 +491,7 @@ ridge_plots <- weighted_dat |>
 ```
 
 ### Atlantic mackerel
-
-Managed by the Mid-Atlantic fisheries management council
-
-
+Managed by the MAFMC under the Squid, Mackerel, and Butterfish FMP.
 
 #### Distributions
 
@@ -559,11 +559,12 @@ x$biomass_bins[[1]]
 y$ridge_plot[[1]]
 
 ```
+#### Relative Abundance
 
 #### Environmental variables
 
 ```{r}
-#| label: example env plots
+#| label: example env plots 
 #| echo: false
 #| message: false
 #| warning: false
@@ -581,7 +582,8 @@ x$plot[[3]]
 
 ```
 
-### Atlantic croaker
+### Scup
+Managed by the MAFMC under the Summer flounder, Scup, and Black Sea Bass FMP. 
 
 #### Distributions
 
@@ -595,12 +597,102 @@ x$plot[[3]]
 #| fig-height: 3
 
 # Static ----
-static_maps |> filter(comname == "atlantic croaker") -> x
+static_maps |> filter(comname == "scup") -> x
 x$map[[1]] 
 ```
 
 ```{r}
 #| label: example dist plots 2
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 7
+#| fig-height: 5
+#| fig-align: center
+#| layout-ncol: 2
+
+# center of lat, center of lon and percentiles 
+env_plots |>
+  filter(comname == "scup" & label %in% c("Center of latitude", "Center of longitude")) -> x
+
+x$plot[[1]]
+x$plot[[2]]
+
+# percentiles
+all_percentiles |>
+  filter(comname == "scup") -> y
+
+y$lat[[1]]
+y$lon[[1]]
+```
+
+#### Biomass
+
+```{r}
+#| label: example biomass plots 2
+#| echo: false
+#| message: false
+#| warning: false
+#| layout-ncol: 2
+#| fig-align: center
+#| fig-width: 5
+#| fig-height: 7
+#| lightbox:
+#|   group: r-graph
+
+biomass_plots |> filter(comname == "scup") -> x
+ridge_plots   |> filter(comname == "scup") -> y
+
+x$biomass_bins[[1]]
+y$ridge_plot[[1]]
+
+```
+
+#### Relative abundance
+
+#### Environmental variables
+
+```{r}
+#| label: example env plots 2
+#| echo: false
+#| message: false
+#| warning: false
+#| fig-width: 7
+#| fig-height: 5
+#| fig-align: center
+#| layout-ncol: 3
+
+env_plots |>
+  filter(comname == "scup" & label %in% c("Sea surface temperature","Bottom temperature", "Depth")) -> x
+
+x$plot[[1]]
+x$plot[[2]]
+x$plot[[3]]
+
+```
+
+
+### Atlantic croaker
+A potential species of concern.
+
+#### Distributions
+
+```{r, dev = "png", dev.args=list(bg="transparent")}
+#| label: maps 3
+#| echo: false 
+#| message: false 
+#| warning: false 
+#| fig-align: center 
+#| fig-width: 11 
+#| fig-height: 3
+
+# Static ----
+static_maps |> filter(comname == "atlantic croaker") -> x
+x$map[[1]] 
+```
+
+```{r}
+#| label: example dist plots 3
 #| echo: false
 #| message: false
 #| warning: false
@@ -627,7 +719,7 @@ y$lon[[1]]
 #### Biomass
 
 ```{r}
-#| label: example biomass plots 2
+#| label: example biomass plots 3
 #| echo: false
 #| message: false
 #| warning: false
@@ -649,7 +741,7 @@ y$ridge_plot[[1]]
 #### Environmental variables
 
 ```{r}
-#| label: example env plots 2
+#| label: example env plots 3
 #| echo: false
 #| message: false
 #| warning: false
